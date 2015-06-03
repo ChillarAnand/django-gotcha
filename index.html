@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>index</title>
+<meta name="author" content="(Anand Reddy Pandikunta)"/>
+
+<link rel="stylesheet" href="file:///home/anand/.emacs.d/vendor/reveal.js/css/reveal.css"/>
+<link rel="stylesheet" href="file:///home/anand/.emacs.d/vendor/reveal.js/css/theme/simple.css" id="theme"/>
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'file:///home/anand/.emacs.d/vendor/reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<h2>Django Gotchas!!</h2>
+</section>
+
+
+</section>
+<section>
+<section id="sec-0-1" >
+
+<h3>* Binding request.POST In Forms</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+<span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">if</span> request.method == <span style="color: #8b2252;">'POST'</span>:
+<span style="background-color: #f2f2f2;"> </span>   form = ContactForm(request.POST)
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-2" >
+
+<h3>Overriding Form's <span class="underline"><span class="underline">init</span></span> Will Misbind</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+<span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">if</span> request.method == <span style="color: #8b2252;">'POST'</span>:
+<span style="background-color: #f2f2f2;"> </span>   form = ContactForm(request.POST)  <span style="color: #b22222;"># </span><span style="color: #b22222;">gotcha</span>
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">forms.py</span>
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">Contactform</span>(forms.Form):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a020f0;">def</span> <span style="color: #0000ff;">__init__</span>(<span style="color: #a020f0;">self</span>, count = <span style="color: #008b8b;">None</span>, *args, **kwargs):
+</pre>
+</div>
+
+<p>
+request.POST will bind to count 
+</p>
+</section>
+
+</section>
+<section>
+<section id="sec-0-3" >
+
+<h3>Bind request.POST Correctly</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+<span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">if</span> request.method == <span style="color: #8b2252;">'POST'</span>:
+<span style="background-color: #f2f2f2;"> </span>   form=ContactForm(data=request.POST)  <span style="color: #b22222;"># </span><span style="color: #b22222;">!!!</span>
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">forms.py</span>
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">Contactform</span>(forms.Form):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a020f0;">def</span> <span style="color: #0000ff;">__init__</span>(<span style="color: #a020f0;">self</span>, count = <span style="color: #008b8b;">None</span>, *args, **kwargs):
+</pre>
+</div>
+</section>
+
+
+
+
+</section>
+<section>
+<section id="sec-0-4" >
+
+<h3>* Setting Initial Values In Forms</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">forms.py</span>
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">AdvancedForm</span>(forms.Form):
+
+<span style="background-color: #f2f2f2;"> </span> <span style="color: #a020f0;">def</span> <span style="color: #0000ff;">__init__</span>(<span style="color: #a020f0;">self</span>, *args, **kwargs):
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #483d8b;">super</span>().__init__(*args, **kwargs)
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #a020f0;">self</span>.fields[<span style="color: #8b2252;">'name'</span>]<span style="color: #a0522d;">.initial</span> =  <span style="color: #8b2252;">'override'</span>
+
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #a0522d;">name</span>=forms.CharField(max_length=10)
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-5" >
+
+<h3>Won't Work If View Adds Initials</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+<span style="color: #a0522d;">form</span> = AdvancedForm(initial={<span style="color: #8b2252;">'name'</span>: <span style="color: #8b2252;">'precedence'</span>})
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">forms.py</span>
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">AdvancedForm</span>(forms.Form):
+
+<span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">def</span> <span style="color: #0000ff;">__init__</span>(<span style="color: #a020f0;">self</span>, *args, **kwargs):
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #483d8b;">super</span>().__init__(*args, **kwargs)
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #a020f0;">self</span>.fields[<span style="color: #8b2252;">'name'</span>]<span style="color: #a0522d;">.initial</span> = <span style="color: #8b2252;">'override'</span>  <span style="color: #b22222;"># </span><span style="color: #b22222;">gotcha</span>
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-6" >
+
+<h3>Setting Initial Values Correctly</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #a020f0;">class</span> <span style="color: #228b22;">AdvancedForm</span>(forms.Form):
+
+<span style="background-color: #f2f2f2;"> </span>  <span style="color: #a020f0;">def</span> <span style="color: #0000ff;">__init__</span>(<span style="color: #a020f0;">self</span>, *args, **kwargs):
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #483d8b;">super</span>().__init__(*args, **kwargs)
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #a020f0;">self</span>.initial[<span style="color: #8b2252;">'name'</span>] = <span style="color: #8b2252;">'override'</span>  <span style="color: #b22222;"># </span><span style="color: #b22222;">!!!  </span>
+
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #a0522d;">name</span>=forms.CharField(max_length=10)
+</pre>
+</div>
+</section>
+
+
+
+</section>
+<section>
+<section id="sec-0-7" >
+
+<h3>* Add two forms in same page</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #a020f0;">if</span> request.method == <span style="color: #8b2252;">'GET'</span>:
+<span style="background-color: #f2f2f2;"> </span>   form1 = Contactform1(conference)
+<span style="background-color: #f2f2f2;"> </span>   form2 = Contactform2(conference)
+</pre>
+</div>
+</section>
+
+
+
+</section>
+<section>
+<section id="sec-0-8" >
+
+<h3>Issues with validation</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #a020f0;">if</span> request.method == <span style="color: #8b2252;">'POST'</span>:
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">if</span> form1.is_valid():
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">...</span>
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">else</span>:
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">...</span>
+
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">if</span> form2.is_valid():
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">...</span>
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">else</span>:
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">...</span>
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-9" >
+
+<h3>Use different action for urls</h3>
+<div class="org-src-container">
+
+<pre  class="src src-html">&lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">method</span>=<span style="color: #8b2252;">"POST"</span> <span style="color: #a0522d;">action</span>=<span style="color: #8b2252;">"/url1/"</span>&gt;
+&lt;/<span style="color: #0000ff;">form</span>&gt;
+
+&lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">method</span>=<span style="color: #8b2252;">"POST"</span> <span style="color: #a0522d;">action</span>=<span style="color: #8b2252;">"/url2/"</span>&gt;
+&lt;/<span style="color: #0000ff;">form</span>&gt;
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-10" >
+
+<h3>Alternatively use different button names</h3>
+<div class="org-src-container">
+
+<pre  class="src src-html">&lt;<span style="color: #0000ff;">form</span>&gt;
+   &lt;<span style="color: #0000ff;">button</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"submit"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"form1"</span>&gt;Submit&lt;/<span style="color: #0000ff;">button</span>&gt;
+&lt;/<span style="color: #0000ff;">form</span>&gt;
+
+&lt;<span style="color: #0000ff;">form</span>&gt;
+   &lt;<span style="color: #0000ff;">button</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"submit"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"form2"</span>&gt;Submit&lt;/<span style="color: #0000ff;">button</span>&gt;
+&lt;/<span style="color: #0000ff;">form</span>&gt;
+</pre>
+</div>
+
+
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #a020f0;">if</span> <span style="color: #8b2252;">'form1'</span> <span style="color: #a020f0;">in</span> request.POST:
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">do action1</span>
+
+<span style="color: #a020f0;">if</span> <span style="color: #8b2252;">'form2'</span> <span style="color: #a020f0;">in</span> request.POST:
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">do action2</span>
+</pre>
+</div>
+</section>
+
+
+</section>
+<section>
+<section id="sec-0-11" >
+
+<h3>* Create nullable field in database</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">models.py</span>
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">Book</span>(models.Model):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">count</span> = models.IntegerField(max_length=10, null=<span style="color: #008b8b;">True</span>)
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-12" >
+
+<h3>Form Doesn't Accept Empty Values</h3>
+</section>
+
+</section>
+<section>
+<section id="sec-0-13" >
+
+<h3>Add blank=True</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">models.py</span>
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">Book</span>(models.Model):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">count</span> = models.IntegerField(max_length=10, null=<span style="color: #008b8b;">True</span>, blank=<span style="color: #008b8b;">True</span>)
+</pre>
+</div>
+</section>
+
+
+
+
+</section>
+<section>
+<section id="sec-0-14" >
+
+<h3>* Weird Attribute Errors</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">urls.py</span>
+<span style="color: #a0522d;">urlpatterns</span> = (
+<span style="background-color: #f2f2f2;"> </span>   url(r<span style="color: #8b2252;">'^$'</span>, index)
+)
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">admin.py</span>
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">BookAdmin</span>(admin.ModelAdmin):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">list_display</span> = (<span style="color: #8b2252;">'name'</span>)
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-15" >
+
+<h3>Django Is Expecting A Tuple(Or An Iterable)</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">urls.py</span>
+<span style="color: #a0522d;">urlpatterns</span> = (
+<span style="background-color: #f2f2f2;"> </span>   url(r<span style="color: #8b2252;">'^$'</span>, index)  <span style="color: #b22222;"># </span><span style="color: #b22222;">gotcha</span>
+)
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">admin.py</span>
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">BookAdmin</span>(admin.ModelAdmin):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">list_display</span> = (<span style="color: #8b2252;">'name'</span>)  <span style="color: #b22222;">#  </span><span style="color: #b22222;">gotcha</span>
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-16" >
+
+<h3>Pass A Tuple(Or Iterable)</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">urls.py</span>
+<span style="color: #a0522d;">urlpatterns</span> = (
+<span style="background-color: #f2f2f2;"> </span>   url(r<span style="color: #8b2252;">'^$'</span>, index),
+)
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">admin.py</span>
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">BookAdmin</span>(admin.ModelAdmin):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">list_display</span> = (<span style="color: #8b2252;">'name'</span>,)
+</pre>
+</div>
+</section>
+
+
+
+</section>
+<section>
+<section id="sec-0-17" >
+
+<h3>* Get Last Item In A Query Set</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">shell </span>
+In [12]: Proposal.objects.<span style="color: #483d8b;">filter</span>()
+Out[12]: [&lt;Proposal: Consectetur Proposal&gt;, &lt;Proposal: Rem Sit Proposal&gt;]
+
+In [13]: <span style="color: #a0522d;">p</span> = Proposal.objects.<span style="color: #483d8b;">filter</span>()
+
+In [14]: p[-1]
+</pre>
+</div>
+</section>
+
+
+</section>
+<section>
+<section id="sec-0-18" >
+
+<h3>Django Querysets Are Not Lists</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python">---------------------------------------------------------------------
+<span style="color: #228b22;">AssertionError</span>                      Traceback (most recent call last)
+&lt;ipython-<span style="color: #483d8b;">input</span>-14-f4039f8a3e39&gt; <span style="color: #a020f0;">in</span> &lt;module&gt;()
+----&gt; 1 p[-1]
+
+<span style="color: #228b22;">AssertionError</span>: Negative indexing <span style="color: #a020f0;">is</span> <span style="color: #a020f0;">not</span> supported.
+
+
+In [6]: <span style="color: #483d8b;">type</span>(p)
+Out[6]: django.db.models.query.QuerySet
+</pre>
+</div>
+
+<p>
+Don't Compare Queryset With Empty List
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-python">In [9]: Proposal.objects.<span style="color: #483d8b;">filter</span>(<span style="color: #483d8b;">id</span>=1111111111111)
+Out[9]: []
+
+In [10]: p == []
+Out[10]: <span style="color: #008b8b;">False</span>
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-19" >
+
+<h3>Use list() or .count()</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">convert to list </span>
+In [4]: <span style="color: #a0522d;">pp</span> = <span style="color: #483d8b;">list</span>(p)
+
+In [5]: pp[-1]
+Out[5]: &lt;Proposal: Consectetur Proposal&gt;
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">use count and then substract</span>
+In [15]: <span style="color: #a0522d;">p</span> = Proposal.objects.<span style="color: #483d8b;">filter</span>(<span style="color: #483d8b;">id</span>=1)
+
+In [16]: p[p.count()-1]
+Out[16]: &lt;Proposal: Consectetur Proposal&gt;
+</pre>
+</div>
+</section>
+
+
+</section>
+<section>
+<section id="sec-0-20" >
+
+<h3>* Executing Raw SQL</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">get books that begin with `a` </span>
+<span style="color: #a020f0;">from</span> django.db <span style="color: #a020f0;">import</span> connection
+
+<span style="color: #a0522d;">query</span> = <span style="color: #8b2252;">"SELECT * FROM gutenberg.books LIKE 'a%';"</span>
+
+<span style="color: #a020f0;">with</span> connection.cursor() <span style="color: #a020f0;">as</span> c:
+<span style="background-color: #f2f2f2;"> </span>   c.execute(query)
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-21" >
+
+<h3>Throws TypeError</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">get books that begin with `a` </span>
+
+<span style="color: #a0522d;">query</span> = <span style="color: #8b2252;">"SELECT * FROM gutenberg.books LIKE 'a%';"</span>  <span style="color: #b22222;"># </span><span style="color: #b22222;">gotcha</span>
+
+<span style="color: #a020f0;">with</span> connection.cursor() <span style="color: #a020f0;">as</span> c:
+<span style="background-color: #f2f2f2;"> </span>   c.execute(query)
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-22" >
+
+<h3>user `%` to escape `%`</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">get books that begin with `a` </span>
+
+<span style="color: #a0522d;">query</span> = <span style="color: #8b2252;">"SELECT * FROM gutenberg.books LIKE 'a%%';"</span>
+
+<span style="color: #a020f0;">with</span> connection.cursor() <span style="color: #a020f0;">as</span> c:
+<span style="background-color: #f2f2f2;"> </span>   c.execute(query)
+</pre>
+</div>
+</section>
+
+
+</section>
+<section>
+<section id="sec-0-23" >
+
+<h3>* Get Items Related To Logged In User</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">some_view</span>(request):
+
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">books</span> = Books.objects.<span style="color: #483d8b;">filter</span>(user=request.user)
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-24" >
+
+<h3>User Objects Are Lazy</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #a020f0;">def</span> <span style="color: #0000ff;">some_view</span>(request):
+
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">books</span> = Books.objects.<span style="color: #483d8b;">filter</span>(user=request.user)  <span style="color: #b22222;"># </span><span style="color: #b22222;">gotcha</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #a020f0;">def</span> <span style="color: #0000ff;">some_view</span>(request):
+
+<span style="background-color: #f2f2f2;"> </span>   _validate_user(request.user)  <span style="color: #b22222;"># </span><span style="color: #b22222;">gotcha</span>
+</pre>
+</div>
+</section>
+
+
+</section>
+<section>
+<section id="sec-0-25" >
+
+<h3>Wake Lazy Objects</h3>
+<p>
+authenticate users or do attribute access
+</p>
+
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #a020f0;">def</span> <span style="color: #0000ff;">some_view</span>(request):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a020f0;">if</span> user.is_authenticated():  <span style="color: #b22222;"># </span><span style="color: #b22222;">!!!</span>
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">books</span> = Books.objects.<span style="color: #483d8b;">filter</span>(user=request.user)
+</pre>
+</div>
+</section>
+
+
+</section>
+<section>
+<section id="sec-0-26" >
+
+<h3>* Selecting distinct(*fields) On A Model</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python">&gt;&gt;&gt; Books.objects.order_by(<span style="color: #8b2252;">'author'</span>).distinct(<span style="color: #8b2252;">'author'</span>)
+&gt;&gt;&gt; Books.objects.order_by(<span style="color: #8b2252;">'author'</span>, <span style="color: #8b2252;">'pub_date'</span>).distinct(<span style="color: #8b2252;">'author'</span>, <span style="color: #8b2252;">'pub_date'</span>)
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-27" >
+
+<h3>Works Only On PostgreSQL</h3>
+</section>
+
+</section>
+<section>
+<section id="sec-0-28" >
+
+<h3>Use Same db For All purposes</h3>
+</section>
+
+
+
+</section>
+
+</div>
+</div>
+
+<script src="file:///home/anand/.emacs.d/vendor/reveal.js/lib/js/head.min.js"></script>
+<script src="file:///home/anand/.emacs.d/vendor/reveal.js/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: true,
+rollingLinks: false,
+keyboard: true,
+overview: true,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'linear', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: 'file:///home/anand/.emacs.d/vendor/reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: 'file:///home/anand/.emacs.d/vendor/reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'file:///home/anand/.emacs.d/vendor/reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: 'file:///home/anand/.emacs.d/vendor/reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+ { src: 'file:///home/anand/.emacs.d/vendor/reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: 'file:///home/anand/.emacs.d/vendor/reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+]
+});
+</script>
+</body>
+</html>
