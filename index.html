@@ -645,41 +645,33 @@ Out[16]: &lt;Proposal: Consectetur Proposal&gt;
 <h3>* Get Items Related To Logged In User</h3>
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+<pre  class="src src-python"><span style="color: #b22222;">#  </span><span style="color: #b22222;">models.py</span>
+<span style="color: #a020f0;">from</span> django.contrib.auth.models <span style="color: #a020f0;">import</span> User
 
-<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">some_view</span>(request):
-<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">books</span> = Books.objects.<span style="color: #483d8b;">filter</span>(user=request.user)
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">PrivilegedUser</span>(models.Model):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">vip</span> = models.Foreignkey(<span style="color: #8b2252;">'User'</span>)
+
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+
+<span style="color: #a020f0;">from</span> .models <span style="color: #a020f0;">import</span> PrivilegedUser
+
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">_validate_user</span>(user):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a020f0;">return</span> PrivilegedUser.objects.<span style="color: #483d8b;">filter</span>(vip=user).exists()
+
+
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">home_view</span>(request):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">vip</span> = _validate_user(request.user)
 </pre>
 </div>
 </section>
+
 
 </section>
 <section>
 <section id="sec-0-31" >
 
-<h3>User Objects Are Lazy</h3>
-<div class="org-src-container">
-
-<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
-
-<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">list_view</span>(request):
-
-<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">books</span> = Books.objects.<span style="color: #483d8b;">filter</span>(user=request.user)  <span style="color: #b22222;"># </span><span style="color: #b22222;">gotcha</span>
-</pre>
-</div>
-
-<div class="org-src-container">
-
-<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
-
-<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">home_view</span>(request):
-
-<span style="background-color: #f2f2f2;"> </span>   _validate_user(request.user)
-
-<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">_validate_user</span>(user):
-<span style="background-color: #f2f2f2;"> </span> <span style="color: #a020f0;">if</span> user == some_user:   <span style="color: #b22222;"># </span><span style="color: #b22222;">gotcha</span>
-</pre>
-</div>
+<h3>TypeError: User Objects Are Lazy</h3>
 </section>
 
 
@@ -694,9 +686,23 @@ Authenticate users or do attribute access
 
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #a020f0;">def</span> <span style="color: #0000ff;">some_view</span>(request):
-<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a020f0;">if</span> user.is_authenticated():  <span style="color: #b22222;"># </span><span style="color: #b22222;">!!!</span>
-<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">books</span> = Books.objects.<span style="color: #483d8b;">filter</span>(user=request.user)
+<pre  class="src src-python"><span style="color: #b22222;">#  </span><span style="color: #b22222;">models.py</span>
+<span style="color: #a020f0;">from</span> django.contrib.auth.models <span style="color: #a020f0;">import</span> User
+
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">PrivilegedUser</span>(models.Model):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">vip</span> = models.Foreignkey(<span style="color: #8b2252;">'User'</span>)
+
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+
+<span style="color: #a020f0;">from</span> .models <span style="color: #a020f0;">import</span> PrivilegedUser
+
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">_validate_user</span>(user):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a020f0;">return</span> user.is_authenticated() <span style="color: #a020f0;">and</span> 
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>  PrivilegedUser.objects.<span style="color: #483d8b;">filter</span>(vip=user).exists()
+
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">home_view</span>(request):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">vip</span> = _validate_user(request.user)
 </pre>
 </div>
 </section>
