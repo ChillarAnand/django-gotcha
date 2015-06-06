@@ -23,22 +23,56 @@
 </head>
 <body>
 <div class="reveal">
+
+      <div class='footer'>
+        <span>Anand Reddy Pandikunta (@chillaranand)</span>
+        <a href="http://www.avilpage.com">http://avilpage.com</a>
+      </div>
+      <style>
+       .reveal .footer {
+         position: absolute;
+         bottom: 1em;
+         left: 1em;
+         font-size: 0.5em;
+       }
+      </style>
 <div class="slides">
 <section>
 <h2>Django Gotchas!!</h2>
 </section>
 
-
 </section>
 <section>
 <section id="sec-0-1" >
 
-<h3>* Binding request.POST In Forms</h3>
+<h3>* Loading urls/static files</h3>
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
-<span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">if</span> request.method == <span style="color: #8b2252;">'POST'</span>:
-<span style="background-color: #f2f2f2;"> </span>   form = ContactForm(request.POST)
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">urls.py</span>
+
+<span style="color: #a0522d;">urlpatterns</span> = (
+<span style="background-color: #f2f2f2;"> </span> <span style="color: #8b2252;">''</span>,
+<span style="background-color: #f2f2f2;"> </span> url(r<span style="color: #8b2252;">'^django'</span>, django_view, name=<span style="color: #8b2252;">'django-view'</span>),
+<span style="background-color: #f2f2f2;"> </span> url(r<span style="color: #8b2252;">'^django-plus'</span>, django_view_plus, name=<span style="color: #8b2252;">'django-view-plus'</span>),
+)
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">templates</span>
+templates
+&#9500;&#9472;&#9472; index.html
+&#9500;&#9472;&#9472; 404.html
+&#9474;&#160;&#160; &#9500;&#9472;&#9472; index.html
+&#9474;&#160;&#160; &#9500;&#9472;&#9472; base.html
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">views.py </span>
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">foo</span>(request):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a020f0;">return</span> render(request, <span style="color: #8b2252;">'index.html'</span>)
+
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">bar</span>(request):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a020f0;">return</span> render(request, <span style="color: #8b2252;">'index.html'</span>)
 </pre>
 </div>
 </section>
@@ -47,42 +81,44 @@
 <section>
 <section id="sec-0-2" >
 
-<h3>Overriding Form's <span class="underline"><span class="underline">init</span></span> Will Misbind</h3>
-<div class="org-src-container">
-
-<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
-<span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">if</span> request.method == <span style="color: #8b2252;">'POST'</span>:
-<span style="background-color: #f2f2f2;"> </span>   form = ContactForm(request.POST)  <span style="color: #b22222;"># </span><span style="color: #b22222;">gotcha</span>
-
-<span style="color: #b22222;"># </span><span style="color: #b22222;">forms.py</span>
-<span style="color: #a020f0;">class</span> <span style="color: #228b22;">Contactform</span>(forms.Form):
-<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a020f0;">def</span> <span style="color: #0000ff;">__init__</span>(<span style="color: #a020f0;">self</span>, count = <span style="color: #008b8b;">None</span>, *args, **kwargs):
-</pre>
-</div>
-
-<p>
-request.POST will bind to count 
-</p>
+<h3>First Match &#x2013;&gt; First Serve</h3>
 </section>
 
 </section>
 <section>
 <section id="sec-0-3" >
 
-<h3>Bind request.POST Correctly</h3>
+<h3>Correctly Order Urls/Files</h3>
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
-<span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">if</span> request.method == <span style="color: #8b2252;">'POST'</span>:
-<span style="background-color: #f2f2f2;"> </span>   form=ContactForm(data=request.POST)  <span style="color: #b22222;"># </span><span style="color: #b22222;">!!!</span>
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">urls.py</span>
 
-<span style="color: #b22222;"># </span><span style="color: #b22222;">forms.py</span>
-<span style="color: #a020f0;">class</span> <span style="color: #228b22;">Contactform</span>(forms.Form):
-<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a020f0;">def</span> <span style="color: #0000ff;">__init__</span>(<span style="color: #a020f0;">self</span>, count = <span style="color: #008b8b;">None</span>, *args, **kwargs):
+<span style="color: #a0522d;">urlpatterns</span> = (
+<span style="background-color: #f2f2f2;"> </span> <span style="color: #8b2252;">''</span>,
+<span style="background-color: #f2f2f2;"> </span> url(r<span style="color: #8b2252;">'^django-plus'</span>, django_view_plus, name=<span style="color: #8b2252;">'django-view-plus'</span>),
+<span style="background-color: #f2f2f2;"> </span> url(r<span style="color: #8b2252;">'^django'</span>, django_view, name=<span style="color: #8b2252;">'django-view'</span>),
+)
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">templates</span>
+templates
+&#9500;&#9472;&#9472; index.html
+&#9500;&#9472;&#9472; 404.html
+&#9474;&#160;&#160; &#9500;&#9472;&#9472; index.html
+&#9474;&#160;&#160; &#9500;&#9472;&#9472; base.html
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">views.py </span>
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">foo</span>(request):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a020f0;">return</span> render(request,  <span style="color: #8b2252;">'index.html'</span>)
+
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">bar</span>(request):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a020f0;">return</span> render(request, <span style="color: #8b2252;">'bar/index.html'</span>)
 </pre>
 </div>
 </section>
-
 
 
 
@@ -94,13 +130,14 @@ request.POST will bind to count
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">forms.py</span>
-<span style="color: #a020f0;">class</span> <span style="color: #228b22;">AdvancedForm</span>(forms.Form):
+
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">ContactForm</span>(forms.Form):
 
 <span style="background-color: #f2f2f2;"> </span> <span style="color: #a020f0;">def</span> <span style="color: #0000ff;">__init__</span>(<span style="color: #a020f0;">self</span>, *args, **kwargs):
 <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #483d8b;">super</span>().__init__(*args, **kwargs)
 <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #a020f0;">self</span>.fields[<span style="color: #8b2252;">'name'</span>]<span style="color: #a0522d;">.initial</span> =  <span style="color: #8b2252;">'override'</span>
 
-<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #a0522d;">name</span>=forms.CharField(max_length=10)
+<span style="background-color: #f2f2f2;"> </span> <span style="color: #a0522d;">name</span> = forms.CharField(max_length=10)
 </pre>
 </div>
 </section>
@@ -113,10 +150,13 @@ request.POST will bind to count
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+
 <span style="color: #a0522d;">form</span> = AdvancedForm(initial={<span style="color: #8b2252;">'name'</span>: <span style="color: #8b2252;">'precedence'</span>})
 
+
 <span style="color: #b22222;"># </span><span style="color: #b22222;">forms.py</span>
-<span style="color: #a020f0;">class</span> <span style="color: #228b22;">AdvancedForm</span>(forms.Form):
+
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">ContactForm</span>(forms.Form):
 
 <span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">def</span> <span style="color: #0000ff;">__init__</span>(<span style="color: #a020f0;">self</span>, *args, **kwargs):
 <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #483d8b;">super</span>().__init__(*args, **kwargs)
@@ -132,33 +172,48 @@ request.POST will bind to count
 <h3>Setting Initial Values Correctly</h3>
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #a020f0;">class</span> <span style="color: #228b22;">AdvancedForm</span>(forms.Form):
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">forms.py </span>
+
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">ContacdForm</span>(forms.Form):
 
 <span style="background-color: #f2f2f2;"> </span>  <span style="color: #a020f0;">def</span> <span style="color: #0000ff;">__init__</span>(<span style="color: #a020f0;">self</span>, *args, **kwargs):
 <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #483d8b;">super</span>().__init__(*args, **kwargs)
 <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #a020f0;">self</span>.initial[<span style="color: #8b2252;">'name'</span>] = <span style="color: #8b2252;">'override'</span>  <span style="color: #b22222;"># </span><span style="color: #b22222;">!!!  </span>
 
-<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #a0522d;">name</span>=forms.CharField(max_length=10)
+<span style="background-color: #f2f2f2;"> </span>  <span style="color: #a0522d;">name</span> = forms.CharField(max_length=10)
 </pre>
 </div>
 </section>
-
 
 
 </section>
 <section>
 <section id="sec-0-7" >
 
-<h3>* Add two forms in same page</h3>
+<h3>* Add Two Forms In Same Page</h3>
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #a020f0;">if</span> request.method == <span style="color: #8b2252;">'GET'</span>:
-<span style="background-color: #f2f2f2;"> </span>   form1 = Contactform1(conference)
-<span style="background-color: #f2f2f2;"> </span>   form2 = Contactform2(conference)
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+
+<span style="color: #a020f0;">if</span> request.method == <span style="color: #8b2252;">'GET'</span>:
+<span style="background-color: #f2f2f2;"> </span>   form1 = Contactform1()
+<span style="background-color: #f2f2f2;"> </span>   form2 = Contactform2()
+
+<span style="color: #a020f0;">if</span> request.method == <span style="color: #8b2252;">'POST'</span>:
+<span style="background-color: #f2f2f2;"> </span>   form1 = Contactform1(request.POST)
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">if</span> form1.is_valid():
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">...</span>
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">else</span>:
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">...</span>
+
+<span style="background-color: #f2f2f2;"> </span>   form2 = Contactform1(request.POST)
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">if</span> form2.is_valid():
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">...</span>
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">else</span>:
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">...</span>
 </pre>
 </div>
 </section>
-
 
 
 </section>
@@ -168,57 +223,67 @@ request.POST will bind to count
 <h3>Issues with validation</h3>
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #a020f0;">if</span> request.method == <span style="color: #8b2252;">'POST'</span>:
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+
+<span style="color: #a020f0;">if</span> request.method == <span style="color: #8b2252;">'POST'</span>:
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>form1 = Contactform1(request.POST)
 <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">if</span> form1.is_valid():
 <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">...</span>
 <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">else</span>:
 <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">...</span>
 
+<span style="background-color: #f2f2f2;"> </span>   form2 = Contactform1(request.POST)
 <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">if</span> form2.is_valid():
-<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">...</span>
-<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span><span style="color: #a020f0;">else</span>:
 <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">...</span>
 </pre>
 </div>
 </section>
+
 
 </section>
 <section>
 <section id="sec-0-9" >
 
-<h3>Use different action for urls</h3>
+<h3>Use Different Action For Urls</h3>
 <div class="org-src-container">
 
-<pre  class="src src-html">&lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">method</span>=<span style="color: #8b2252;">"POST"</span> <span style="color: #a0522d;">action</span>=<span style="color: #8b2252;">"/url1/"</span>&gt;
-&lt;/<span style="color: #0000ff;">form</span>&gt;
+<pre  class="src src-html"><span style="color: #b22222;">&lt;!-- </span><span style="color: #b22222;">template.html -&gt;</span>
 
-&lt;<span style="color: #0000ff;">form</span> <span style="color: #a0522d;">method</span>=<span style="color: #8b2252;">"POST"</span> <span style="color: #a0522d;">action</span>=<span style="color: #8b2252;">"/url2/"</span>&gt;
-&lt;/<span style="color: #0000ff;">form</span>&gt;
+<span style="color: #b22222;">&lt;form method="POST" action="/url1/"&gt;</span>
+<span style="color: #b22222;">&lt;/form&gt;</span>
+
+<span style="color: #b22222;">&lt;form method="POST" action="/url2/"&gt;</span>
+<span style="color: #b22222;">&lt;/form&gt;</span>
 </pre>
 </div>
 </section>
+
 
 </section>
 <section>
 <section id="sec-0-10" >
 
-<h3>Alternatively use different button names</h3>
+<h3>Alternatively Use Different Button Names</h3>
 <div class="org-src-container">
 
-<pre  class="src src-html">&lt;<span style="color: #0000ff;">form</span>&gt;
-   &lt;<span style="color: #0000ff;">button</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"submit"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"form1"</span>&gt;Submit&lt;/<span style="color: #0000ff;">button</span>&gt;
-&lt;/<span style="color: #0000ff;">form</span>&gt;
+<pre  class="src src-html"><span style="color: #b22222;">&lt;!-- </span><span style="color: #b22222;">template.html -&gt;</span>
 
-&lt;<span style="color: #0000ff;">form</span>&gt;
-   &lt;<span style="color: #0000ff;">button</span> <span style="color: #a0522d;">type</span>=<span style="color: #8b2252;">"submit"</span> <span style="color: #a0522d;">name</span>=<span style="color: #8b2252;">"form2"</span>&gt;Submit&lt;/<span style="color: #0000ff;">button</span>&gt;
-&lt;/<span style="color: #0000ff;">form</span>&gt;
+<span style="color: #b22222;">&lt;form&gt;</span>
+<span style="color: #b22222;">   &lt;button type="submit" name="form1"&gt;Submit&lt;/button&gt;</span>
+<span style="color: #b22222;">&lt;/form&gt;</span>
+
+<span style="color: #b22222;">&lt;form&gt;</span>
+<span style="color: #b22222;">   &lt;button type="submit" name="form2"&gt;Submit&lt;/button&gt;</span>
+<span style="color: #b22222;">&lt;/form&gt;</span>
 </pre>
 </div>
 
 
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #a020f0;">if</span> <span style="color: #8b2252;">'form1'</span> <span style="color: #a020f0;">in</span> request.POST:
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+
+<span style="color: #a020f0;">if</span> <span style="color: #8b2252;">'form1'</span> <span style="color: #a020f0;">in</span> request.POST:
 <span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span> <span style="color: #b22222;"># </span><span style="color: #b22222;">do action1</span>
 
 <span style="color: #a020f0;">if</span> <span style="color: #8b2252;">'form2'</span> <span style="color: #a020f0;">in</span> request.POST:
@@ -232,10 +297,11 @@ request.POST will bind to count
 <section>
 <section id="sec-0-11" >
 
-<h3>* Create nullable field in database</h3>
+<h3>* Create Nullable Field In Database</h3>
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">models.py</span>
+
 <span style="color: #a020f0;">class</span> <span style="color: #228b22;">Book</span>(models.Model):
 <span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">count</span> = models.IntegerField(max_length=10, null=<span style="color: #008b8b;">True</span>)
 </pre>
@@ -257,6 +323,7 @@ request.POST will bind to count
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">models.py</span>
+
 <span style="color: #a020f0;">class</span> <span style="color: #228b22;">Book</span>(models.Model):
 <span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">count</span> = models.IntegerField(max_length=10, null=<span style="color: #008b8b;">True</span>, blank=<span style="color: #008b8b;">True</span>)
 </pre>
@@ -265,22 +332,17 @@ request.POST will bind to count
 
 
 
-
 </section>
 <section>
 <section id="sec-0-14" >
 
-<h3>* Weird Attribute Errors</h3>
+<h3>* Admin List Display</h3>
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">urls.py</span>
-<span style="color: #a0522d;">urlpatterns</span> = (
-<span style="background-color: #f2f2f2;"> </span>   url(r<span style="color: #8b2252;">'^$'</span>, index)
-)
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">admin.py</span>
 
-<span style="color: #b22222;"># </span><span style="color: #b22222;">admin.py</span>
-<span style="color: #a020f0;">class</span> <span style="color: #228b22;">BookAdmin</span>(admin.ModelAdmin):
-<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">list_display</span> = (<span style="color: #8b2252;">'name'</span>)
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">BookAdmin</span>(BaseAdmin):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">list_display</span> = (<span style="color: #8b2252;">'name'</span>) + BaseAdmin.list_display
 </pre>
 </div>
 </section>
@@ -289,56 +351,70 @@ request.POST will bind to count
 <section>
 <section id="sec-0-15" >
 
-<h3>Django Is Expecting A Tuple(Or An Iterable)</h3>
+<h3>Django Is Expecting A Tuple/Iterable</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">admin.py</span>
+
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">BookAdmin</span>(BaseAdmin):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">list_display</span> = (<span style="color: #8b2252;">'name'</span>) + BaseAdmin.list_display  <span style="color: #b22222;">#  </span><span style="color: #b22222;">gotcha</span>
+</pre>
+</div>
+
+<p>
+Similar issues with urls
+</p>
+
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">urls.py</span>
+
 <span style="color: #a0522d;">urlpatterns</span> = (
 <span style="background-color: #f2f2f2;"> </span>   url(r<span style="color: #8b2252;">'^$'</span>, index)  <span style="color: #b22222;"># </span><span style="color: #b22222;">gotcha</span>
 )
-
-<span style="color: #b22222;"># </span><span style="color: #b22222;">admin.py</span>
-<span style="color: #a020f0;">class</span> <span style="color: #228b22;">BookAdmin</span>(admin.ModelAdmin):
-<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">list_display</span> = (<span style="color: #8b2252;">'name'</span>)  <span style="color: #b22222;">#  </span><span style="color: #b22222;">gotcha</span>
 </pre>
 </div>
 </section>
+
+
 
 </section>
 <section>
 <section id="sec-0-16" >
 
-<h3>Pass A Tuple(Or Iterable)</h3>
+<h3>Pass A Tuple/Iterable</h3>
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">urls.py</span>
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">admin.py</span>
+
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">BookAdmin</span>(BaseAdmin):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">list_display</span> = (<span style="color: #8b2252;">'name'</span>,) + BaseAdmin.list_display  <span style="color: #b22222;">#  </span><span style="color: #b22222;">gotcha</span>
+
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">urls.py</span>
+
 <span style="color: #a0522d;">urlpatterns</span> = (
 <span style="background-color: #f2f2f2;"> </span>   url(r<span style="color: #8b2252;">'^$'</span>, index),
 )
-
-<span style="color: #b22222;"># </span><span style="color: #b22222;">admin.py</span>
-<span style="color: #a020f0;">class</span> <span style="color: #228b22;">BookAdmin</span>(admin.ModelAdmin):
-<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">list_display</span> = (<span style="color: #8b2252;">'name'</span>,)
 </pre>
 </div>
 </section>
-
 
 
 </section>
 <section>
 <section id="sec-0-17" >
 
-<h3>* Get Last Item In A Query Set</h3>
+<h3>* Generic Views</h3>
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">shell </span>
-In [12]: Proposal.objects.<span style="color: #483d8b;">filter</span>()
-Out[12]: [&lt;Proposal: Consectetur Proposal&gt;, &lt;Proposal: Rem Sit Proposal&gt;]
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
 
-In [13]: <span style="color: #a0522d;">p</span> = Proposal.objects.<span style="color: #483d8b;">filter</span>()
+<span style="color: #a020f0;">from</span> django.views.generic.edit <span style="color: #a020f0;">import</span> DeleteView
 
-In [14]: p[-1]
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">AuthorDelete</span>(DeleteView):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">model</span> = Author
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">success_url</span> = reverse(<span style="color: #8b2252;">'author-list'</span>)
 </pre>
 </div>
 </section>
@@ -347,6 +423,74 @@ In [14]: p[-1]
 </section>
 <section>
 <section id="sec-0-18" >
+
+<h3>Url not available</h3>
+</section>
+
+
+</section>
+<section>
+<section id="sec-0-19" >
+
+<h3>Lazy load url</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+
+<span style="color: #a020f0;">from</span> django.views.generic.edit <span style="color: #a020f0;">import</span> DeleteView
+<span style="color: #a020f0;">from</span> django.core.urlresolvers <span style="color: #a020f0;">import</span> reverse_lazy
+
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">AuthorDelete</span>(DeleteView):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">model</span> = Author
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">success_url</span> = reverse_lazy(<span style="color: #8b2252;">'author-list'</span>)
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-20" >
+
+<h3>Alternatively Override Get Success Url</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+
+<span style="color: #a020f0;">from</span> django.views.generic.edit <span style="color: #a020f0;">import</span> DeleteView
+
+<span style="color: #a020f0;">class</span> <span style="color: #228b22;">AuthorDelete</span>(DeleteView):
+<span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">model</span> = Author
+
+<span style="background-color: #f2f2f2;"> </span>  <span style="color: #a020f0;">def</span> <span style="color: #0000ff;">get_success_url</span>(<span style="color: #a020f0;">self</span>):
+<span style="background-color: #f2f2f2;"> </span>   <span style="background-color: #f2f2f2;"> </span>   <span style="color: #a020f0;">return</span> reverse(<span style="color: #8b2252;">'author-list'</span>)
+</pre>
+</div>
+</section>
+
+
+
+</section>
+<section>
+<section id="sec-0-21" >
+
+<h3>* Get Last Item In A Query Set</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">shell </span>
+In [2]: Proposal.objects.<span style="color: #483d8b;">filter</span>()
+Out[2]: [&lt;Proposal: Consectetur Proposal&gt;, &lt;Proposal: Rem Sit Proposal&gt;]
+
+In [3]: <span style="color: #a0522d;">p</span> = Proposal.objects.<span style="color: #483d8b;">filter</span>()
+
+In [4]: p[-1]
+</pre>
+</div>
+</section>
+
+
+</section>
+<section>
+<section id="sec-0-22" >
 
 <h3>Django Querysets Are Not Lists</h3>
 <div class="org-src-container">
@@ -381,7 +525,7 @@ Out[10]: <span style="color: #008b8b;">False</span>
 
 </section>
 <section>
-<section id="sec-0-19" >
+<section id="sec-0-23" >
 
 <h3>Use list() or .count()</h3>
 <div class="org-src-container">
@@ -404,7 +548,7 @@ Out[16]: &lt;Proposal: Consectetur Proposal&gt;
 
 </section>
 <section>
-<section id="sec-0-20" >
+<section id="sec-0-24" >
 
 <h3>* Executing Raw SQL</h3>
 <div class="org-src-container">
@@ -422,12 +566,14 @@ Out[16]: &lt;Proposal: Consectetur Proposal&gt;
 
 </section>
 <section>
-<section id="sec-0-21" >
+<section id="sec-0-25" >
 
 <h3>Throws TypeError</h3>
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">get books that begin with `a` </span>
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">file.py</span>
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">get books that begin with `a` </span>
 
 <span style="color: #a0522d;">query</span> = <span style="color: #8b2252;">"SELECT * FROM gutenberg.books LIKE 'a%';"</span>  <span style="color: #b22222;"># </span><span style="color: #b22222;">gotcha</span>
 
@@ -435,16 +581,23 @@ Out[16]: &lt;Proposal: Consectetur Proposal&gt;
 <span style="background-color: #f2f2f2;"> </span>   c.execute(query)
 </pre>
 </div>
+
+<p>
+% is a placeholder in query string
+</p>
 </section>
+
 
 </section>
 <section>
-<section id="sec-0-22" >
+<section id="sec-0-26" >
 
-<h3>user `%` to escape `%`</h3>
+<h3>Use `%` To Escape `%`</h3>
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">get books that begin with `a` </span>
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">file.py</span>
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">get books that begin with `a` </span>
 
 <span style="color: #a0522d;">query</span> = <span style="color: #8b2252;">"SELECT * FROM gutenberg.books LIKE 'a%%';"</span>
 
@@ -457,14 +610,44 @@ Out[16]: &lt;Proposal: Consectetur Proposal&gt;
 
 </section>
 <section>
-<section id="sec-0-23" >
+<section id="sec-0-27" >
+
+<h3>* Selecting distinct(*fields) On A Model</h3>
+<div class="org-src-container">
+
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">shell</span>
+
+&gt;&gt;&gt; Books.objects.order_by(<span style="color: #8b2252;">'author'</span>).distinct(<span style="color: #8b2252;">'author'</span>)
+&gt;&gt;&gt; Books.objects.order_by(<span style="color: #8b2252;">'author'</span>, <span style="color: #8b2252;">'date'</span>).distinct(<span style="color: #8b2252;">'author'</span>, <span style="color: #8b2252;">'date'</span>)
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-0-28" >
+
+<h3>Works Only On PostgreSQL</h3>
+</section>
+
+</section>
+<section>
+<section id="sec-0-29" >
+
+<h3>Use Same db For All purposes</h3>
+</section>
+
+
+</section>
+<section>
+<section id="sec-0-30" >
 
 <h3>* Get Items Related To Logged In User</h3>
 <div class="org-src-container">
 
 <pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
-<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">some_view</span>(request):
 
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">some_view</span>(request):
 <span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">books</span> = Books.objects.<span style="color: #483d8b;">filter</span>(user=request.user)
 </pre>
 </div>
@@ -472,12 +655,14 @@ Out[16]: &lt;Proposal: Consectetur Proposal&gt;
 
 </section>
 <section>
-<section id="sec-0-24" >
+<section id="sec-0-31" >
 
 <h3>User Objects Are Lazy</h3>
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #a020f0;">def</span> <span style="color: #0000ff;">some_view</span>(request):
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
+
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">list_view</span>(request):
 
 <span style="background-color: #f2f2f2;"> </span>   <span style="color: #a0522d;">books</span> = Books.objects.<span style="color: #483d8b;">filter</span>(user=request.user)  <span style="color: #b22222;"># </span><span style="color: #b22222;">gotcha</span>
 </pre>
@@ -485,9 +670,14 @@ Out[16]: &lt;Proposal: Consectetur Proposal&gt;
 
 <div class="org-src-container">
 
-<pre  class="src src-python"><span style="color: #a020f0;">def</span> <span style="color: #0000ff;">some_view</span>(request):
+<pre  class="src src-python"><span style="color: #b22222;"># </span><span style="color: #b22222;">views.py</span>
 
-<span style="background-color: #f2f2f2;"> </span>   _validate_user(request.user)  <span style="color: #b22222;"># </span><span style="color: #b22222;">gotcha</span>
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">home_view</span>(request):
+
+<span style="background-color: #f2f2f2;"> </span>   _validate_user(request.user)
+
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">_validate_user</span>(user):
+<span style="background-color: #f2f2f2;"> </span> <span style="color: #a020f0;">if</span> user == some_user:   <span style="color: #b22222;"># </span><span style="color: #b22222;">gotcha</span>
 </pre>
 </div>
 </section>
@@ -495,11 +685,11 @@ Out[16]: &lt;Proposal: Consectetur Proposal&gt;
 
 </section>
 <section>
-<section id="sec-0-25" >
+<section id="sec-0-32" >
 
 <h3>Wake Lazy Objects</h3>
 <p>
-authenticate users or do attribute access
+Authenticate users or do attribute access
 </p>
 
 <div class="org-src-container">
@@ -514,35 +704,14 @@ authenticate users or do attribute access
 
 </section>
 <section>
-<section id="sec-0-26" >
-
-<h3>* Selecting distinct(*fields) On A Model</h3>
-<div class="org-src-container">
-
-<pre  class="src src-python">&gt;&gt;&gt; Books.objects.order_by(<span style="color: #8b2252;">'author'</span>).distinct(<span style="color: #8b2252;">'author'</span>)
-&gt;&gt;&gt; Books.objects.order_by(<span style="color: #8b2252;">'author'</span>, <span style="color: #8b2252;">'pub_date'</span>).distinct(<span style="color: #8b2252;">'author'</span>, <span style="color: #8b2252;">'pub_date'</span>)
-</pre>
-</div>
+<section id="sec-1-1" >
+<h3>References</h3>
+<a href="http://docs.djangoproject.com">http://docs.djangoproject.com</a>
+<a href="https://code.djangoproject.com/wiki/NewbieMistakes">https://code.djangoproject.com/wiki/NewbieMistakes</a>
+<a href="https://github.com/agiliq/django-gotchas">https://github.com/agiliq/django-gotchas</a>
+<a href="http://www.avilpage.com/2015/03/django-form-gotchas-dynamic-initial.html">http://www.avilpage.com/2015/03/django-form-gotchas-dynamic-initial.html</a>
 </section>
-
 </section>
-<section>
-<section id="sec-0-27" >
-
-<h3>Works Only On PostgreSQL</h3>
-</section>
-
-</section>
-<section>
-<section id="sec-0-28" >
-
-<h3>Use Same db For All purposes</h3>
-</section>
-
-
-
-</section>
-
 </div>
 </div>
 
